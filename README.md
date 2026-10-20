@@ -2,7 +2,7 @@
 
 A command-line tool that snapshots your working state into a markdown file so you can step away from a task and pick it up later. It gathers your git status, diffs, recent commits, and recent terminal activity, hands that to an LLM, and saves the model's summary as a timestamped `.md` file.
 
-I built this as prep for the Meta Global AI Developer Hackathon. It's the first piece of a bigger project I'm calling the Cognitive Load Governor.
+I built this as practice for the Meta Global AI Developer Hackathon. It's the first piece of a bigger project I'm calling the Cognitive Load Governor.
 
 ## Install
 
