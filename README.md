@@ -85,7 +85,15 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-The suite covers capture, the prompt, output format, and backend selection. Tests do not call a model or the network. GitHub Actions runs `pytest -q` on pushes to `main` and on pull requests, on Python 3.11.
+The suite covers capture (against throwaway git repos built in a temp directory), the prompt builder, the output format, and backend selection. None of the tests make a network call or invoke a real model. The OpenAI backend is checked only for its missing-key error, and dry-run is asserted to construct no backend at all. GitHub Actions runs the same `pytest -q` on every push to `main` and on pull requests, against Python 3.11.
+
+## Design decisions
+
+- Capture never aborts the run. Each git or terminal command is wrapped so that a failure becomes a note in the output. A freeze is most useful when things are already broken, so the tool keeps going even when parts of the environment don't cooperate.
+- The diff is capped at 20,000 characters. Diffs can be arbitrarily large, so the cap keeps the prompt bounded, and it notes how many characters it cut so you can see the diff was trimmed.
+- Backends are a one-method interface. `summarize(prompt) -> str` is the whole contract, which keeps the two shipped backends small and makes a third easy to add.
+- The summary shape is fixed. Asking for the same four sections every time means every freeze reads the same way when you come back to one cold.
+- Config comes from the environment. The OpenAI backend is driven entirely by `FREEZE_*` variables and the output location is a flag, so there's no config file to manage.
 
 ## Limitations
 
