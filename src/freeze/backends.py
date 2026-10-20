@@ -1,8 +1,4 @@
-"""Pluggable LLM backends.
-
-Each backend exposes ``summarize(prompt) -> str``. New backends only need to
-implement that one method.
-"""
+"""LLM backends. Each one implements ``summarize(prompt) -> str``."""
 
 from __future__ import annotations
 

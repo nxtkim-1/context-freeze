@@ -39,8 +39,6 @@ freeze --dry-run            # print what would be sent, call no model
 | `--provider` | `claude` | Which LLM backend to use: `claude` or `openai`. |
 | `--dry-run` | off | Print the captured context and the assembled prompt, then exit without calling a model. |
 
-Use `--dry-run` when you want to see exactly what context the tool collected and what prompt it would send, without spending a model call.
-
 ## What gets captured
 
 `capture()` collects four things from the target repository:
@@ -50,7 +48,7 @@ Use `--dry-run` when you want to see exactly what context the tool collected and
 - **recent commits:** `git log -5 --oneline`.
 - **terminal:** if you're inside tmux (`$TMUX` is set), the last 200 lines of the current pane via `tmux capture-pane`. Otherwise it falls back to shell history: the file named by `$HISTFILE`, then `~/.bash_history`, then `~/.zsh_history`, taking the last 50 lines. If none of those are available it records `(no terminal history available)`.
 
-Every capture step tolerates failure. A missing command, a timeout, or a git error turns into a short parenthetical note in that field rather than crashing the run.
+Every capture step tolerates failure, because a freeze is most useful when things are already broken. A missing command, a timeout, or a git error turns into a short parenthetical note in that field rather than crashing the run.
 
 ## Backends
 
@@ -72,9 +70,7 @@ Posts to any OpenAI-compatible chat-completions endpoint. It reads three environ
 | `FREEZE_API_KEY` | *(none)* | Bearer token. Required; the run fails if it's unset. |
 | `FREEZE_MODEL` | `gpt-4o-mini` | Model name sent in the request. |
 
-Because the base URL is configurable, this backend also works against local or self-hosted servers that speak the OpenAI chat API.
-
-Each backend only has to implement one method, `summarize(prompt) -> str`, so adding another one is small.
+Any server that speaks the OpenAI chat API works if you set `FREEZE_BASE_URL`.
 
 ## Output
 
@@ -89,19 +85,11 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-The suite covers capture (against throwaway git repos built in a temp directory), the prompt builder, the output format, and backend selection. None of the tests make a network call or invoke a real model. The OpenAI backend is checked only for its missing-key error, and dry-run is asserted to construct no backend at all. GitHub Actions runs the same `pytest -q` on every push to `main` and on pull requests, against Python 3.11.
-
-## Design decisions
-
-- Capture never aborts the run. Each git or terminal command is wrapped so that a failure becomes a note in the output. A freeze is most useful when things are already broken, so the tool keeps going even when parts of the environment don't cooperate.
-- The diff is capped at 20,000 characters. Diffs can be arbitrarily large, so the cap keeps the prompt bounded, and it notes how many characters it cut so you can see the diff was trimmed.
-- Backends are a one-method interface. `summarize(prompt) -> str` is the whole contract, which keeps the two shipped backends small and makes a third easy to add.
-- The summary shape is fixed. Asking for the same four sections every time means every freeze reads the same way when you come back to one cold.
-- Config comes from the environment. The OpenAI backend is driven entirely by `FREEZE_*` variables and the output location is a flag, so there's no config file to manage.
+The suite covers capture, the prompt, output format, and backend selection. Tests do not call a model or the network. GitHub Actions runs `pytest -q` on pushes to `main` and on pull requests, on Python 3.11.
 
 ## Limitations
 
-- The quality of a freeze is only as good as the model behind it, and the `claude` backend depends on an external CLI being installed and working.
+- The `claude` backend needs the Claude Code CLI installed and working.
 - Only git repositories are understood. There's no support for other version-control systems, and a non-git directory will just produce error notes in the git fields.
 - Terminal capture is best-effort. Outside tmux it reads shell history files, which may be stale, disabled, or written only on shell exit, so recent commands can be missing.
 - The diff truncation cuts on a character count rather than at a hunk boundary, so a trimmed diff can end mid-hunk.

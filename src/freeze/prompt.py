@@ -19,7 +19,6 @@ so briefly rather than guessing. Keep it tight."""
 
 
 def build_prompt(ctx: Context) -> str:
-    """Assemble the full prompt from captured context."""
     return "\n\n".join(
         [
             INSTRUCTIONS,

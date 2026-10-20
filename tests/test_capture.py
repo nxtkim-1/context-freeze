@@ -20,7 +20,7 @@ def make_repo(path):
 
 def test_capture_on_temp_repo(tmp_path):
     repo = make_repo(tmp_path / "r")
-    (repo / "a.txt").write_text("hello world\n")  # unstaged change
+    (repo / "a.txt").write_text("hello world\n")
 
     ctx = capture(repo)
 
