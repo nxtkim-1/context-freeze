@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "context-freeze"
+version = "0.1.0"
+description = "Snapshot your working state into a markdown freeze so you can step away and resume."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.28"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+freeze = "freeze.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
